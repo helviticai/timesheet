@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+               {<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Saisie des Temps</title>
+    <title>Système de Gestion des Temps</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .notification-badge {
@@ -13,11 +13,48 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide-down {
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .modal {
+            backdrop-filter: blur(4px);
+        }
     </style>
 </head>
 <body class="bg-gray-50">
+<!-- Login Screen -->
+<div id="loginScreen" class="flex items-center justify-center h-screen bg-gray-100">
+  <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-sm">
+    <h2 class="text-xl font-bold mb-4">Connexion</h2>
+    <form id="loginForm" class="space-y-4">
+      <input type="email" id="loginEmail" placeholder="Email" class="w-full border rounded px-3 py-2" required>
+      <input type="password" id="loginPassword" placeholder="Mot de passe" class="w-full border rounded px-3 py-2" required>
+      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Se connecter</button>
+    </form>
+  </div>
+</div>
+
+<!-- Application content -->
+<div id="appContent" class="hidden">
     <!-- Header -->
-    <div class="bg-white shadow-sm border-b">
+    <div class="bg-white shadow-sm border-b sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center space-x-4">
@@ -31,31 +68,27 @@
                 <div class="flex items-center space-x-4">
                     <!-- Notifications -->
                     <div class="relative">
-                        <button id="notificationBtn" class="relative p-2 text-gray-500 hover:text-gray-700">
+                        <button id="notificationBtn" class="relative p-2 text-gray-500 hover:text-gray-700 transition-colors">
                             🔔
                             <span id="notificationBadge" class="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center notification-badge">
-                                3
+                                <span id="notificationCount">3</span>
                             </span>
                         </button>
                     </div>
                     
-                    <button id="exportBtn" class="flex items-center space-x-2 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700">
+                    <button id="exportBtn" class="flex items-center space-x-2 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 transition-colors">
                         📥 Export
                     </button>
                     
                     <div class="flex items-center space-x-2">
                         👤
-                        <select id="userSelect" class="text-sm border border-gray-300 rounded px-2 py-1">
-                            <option value="Jean Dupont">Jean Dupont (employee)</option>
-                            <option value="Marie Martin">Marie Martin (manager)</option>
-                            <option value="Pierre Durand">Pierre Durand (employee)</option>
-                            <option value="Sophie Blanc">Sophie Blanc (admin)</option>
+                        <select id="userSelect" class="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500">
                         </select>
                     </div>
                     
                     <div class="flex items-center space-x-2">
                         📅
-                        <span class="text-sm text-gray-700" id="currentDate"></span>
+                        <input type="date" id="currentDateInput" class="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
             </div>
@@ -66,23 +99,23 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="border-b border-gray-200">
             <nav class="-mb-px flex space-x-8" id="tabNavigation">
-                <button class="tab-btn py-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium text-sm" data-tab="dashboard">
+                <button class="tab-btn py-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium text-sm transition-colors active" data-tab="dashboard">
                     Dashboard
                 </button>
-                <button class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm" data-tab="saisie">
+                <button class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm transition-colors" data-tab="saisie">
                     Saisie des temps
                 </button>
-                <button class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm" data-tab="conges">
-                    Congés & Absences
+                <button class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm transition-colors" data-tab="utilisateurs">
+                    Utilisateurs
                 </button>
-                <button class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm" data-tab="projets">
+                <button class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm transition-colors" data-tab="projets">
                     Projets
                 </button>
-                <button class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm" data-tab="validation">
-                    Validation (2)
+                <button class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm transition-colors" data-tab="validation">
+                    Validation (<span id="validationCount">2</span>)
                 </button>
-                <button class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm" data-tab="rapports">
-                    Rapports
+                <button class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm transition-colors" data-tab="conges">
+                    Congés
                 </button>
             </nav>
         </div>
@@ -92,37 +125,15 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         
         <!-- Dashboard -->
-        <div id="dashboard-content" class="tab-content">
+        <div id="dashboard-content" class="tab-content active">
             <div class="space-y-6">
-                <!-- Alertes et notifications importantes -->
+                <!-- Statistiques et alerts -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="lg:col-span-2">
                         <div class="bg-white p-6 rounded-lg shadow">
                             <h2 class="text-lg font-medium text-gray-900 mb-4">Notifications</h2>
-                            <div class="space-y-3">
-                                <div class="flex items-start space-x-3 p-3 rounded bg-blue-50 border-l-4 border-blue-400">
-                                    <div class="mt-1 text-yellow-500">⚠️</div>
-                                    <div class="flex-1">
-                                        <p class="text-sm text-gray-900">Vous avez 9h saisies hier, attention aux heures supplémentaires</p>
-                                        <p class="text-xs text-gray-500">Il y a 2 heures</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="flex items-start space-x-3 p-3 rounded bg-gray-50">
-                                    <div class="mt-1 text-green-500">✅</div>
-                                    <div class="flex-1">
-                                        <p class="text-sm text-gray-900">Feuille de temps soumise pour validation</p>
-                                        <p class="text-xs text-gray-500">Hier</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="flex items-start space-x-3 p-3 rounded bg-gray-50">
-                                    <div class="mt-1 text-blue-500">ℹ️</div>
-                                    <div class="flex-1">
-                                        <p class="text-sm text-gray-900">Nouvelle demande de congé de Marie Martin en attente</p>
-                                        <p class="text-xs text-gray-500">Il y a 3 jours</p>
-                                    </div>
-                                </div>
+                            <div id="notificationsList" class="space-y-3">
+                                <!-- Les notifications seront générées dynamiquement -->
                             </div>
                         </div>
                     </div>
@@ -131,22 +142,22 @@
                     <div class="space-y-4">
                         <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 rounded-lg text-white">
                             <div class="text-sm opacity-90">Cette semaine</div>
-                            <div class="text-2xl font-bold">38h</div>
-                            <div class="text-xs mt-1 text-yellow-200">Attention aux heures supplémentaires</div>
+                            <div class="text-2xl font-bold" id="weeklyHours">0h</div>
+                            <div class="text-xs mt-1" id="weeklyWarning"></div>
                         </div>
 
                         <div class="bg-gradient-to-r from-green-500 to-green-600 p-4 rounded-lg text-white">
                             <div class="text-sm opacity-90">Taux d'occupation</div>
-                            <div class="text-2xl font-bold">86%</div>
+                            <div class="text-2xl font-bold" id="occupationRate">0%</div>
                             <div class="w-full bg-green-400 rounded-full h-2 mt-2">
-                                <div class="bg-white rounded-full h-2 transition-all duration-300" style="width: 86%"></div>
+                                <div id="occupationBar" class="bg-white rounded-full h-2 transition-all" style="width: 0%"></div>
                             </div>
                         </div>
 
                         <div class="bg-gradient-to-r from-purple-500 to-purple-600 p-4 rounded-lg text-white">
-                            <div class="text-sm opacity-90">Congés pris</div>
-                            <div class="text-2xl font-bold">8 jours</div>
-                            <div class="text-xs opacity-90">Restant: 17 CP</div>
+                            <div class="text-sm opacity-90">Congés acquis</div>
+                            <div class="text-2xl font-bold" id="vacationEarned">25j</div>
+                            <div class="text-xs opacity-90" id="vacationDetails">Restant: 18 | Pris: 7</div>
                         </div>
                     </div>
                 </div>
@@ -154,45 +165,17 @@
                 <!-- Validation en attente -->
                 <div class="bg-white p-6 rounded-lg shadow border-l-4 border-orange-400">
                     <h2 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                        👤 Actions en attente (2)
+                        👤 Actions en attente (<span id="validationDashboardCount">0</span>)
                     </h2>
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center p-3 bg-orange-50 rounded">
-                            <div>
-                                <span class="font-medium">Pierre Durand</span>
-                                <span class="text-gray-600 ml-2">Semaine du 26/08 - 38h</span>
-                            </div>
-                            <div class="flex space-x-2">
-                                <button class="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700">
-                                    Valider
-                                </button>
-                                <button class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700">
-                                    Rejeter
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="flex justify-between items-center p-3 bg-orange-50 rounded">
-                            <div>
-                                <span class="font-medium">Marie Martin</span>
-                                <span class="text-gray-600 ml-2">Congé maladie 2 jours</span>
-                            </div>
-                            <div class="flex space-x-2">
-                                <button class="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700">
-                                    Valider
-                                </button>
-                                <button class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700">
-                                    Rejeter
-                                </button>
-                            </div>
-                        </div>
+                    <div id="validationList" class="space-y-3">
+                        <!-- Les validations en attente seront générées dynamiquement -->
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Saisie des temps -->
-        <div id="saisie-content" class="tab-content hidden">
+        <div id="saisie-content" class="tab-content">
             <div class="space-y-6">
                 <!-- Formulaire de saisie -->
                 <div class="bg-white p-6 rounded-lg shadow">
@@ -201,33 +184,52 @@
                     <form id="timesheetForm" class="space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Projet</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Projet *</label>
                                 <select id="projectSelect" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                                     <option value="">Sélectionner un projet</option>
-                                    <option value="dev-001">DEV-001 - Développement Site Web</option>
-                                    <option value="maint-002">MAINT-002 - Maintenance Application</option>
-                                    <option value="form-003">FORM-003 - Formation Équipe</option>
-                                    <option value="meet-004">MEET-004 - Réunions Client</option>
                                 </select>
                             </div>
                             
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Heures</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Heures *</label>
                                 <input type="number" id="hoursInput" step="0.25" min="0" max="24" placeholder="7.5" 
                                        class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                             </div>
                             
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Description (optionnel)</label>
-                                <input type="text" id="descriptionInput" placeholder="Description des tâches réalisées..." 
-                                       class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                                <input type="date" id="entryDate" 
+                                       class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
+                                <select id="statusSelect" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="draft">Brouillon</option>
+                                    <option value="pending">En attente</option>
+                                    <option value="submitted">Soumis</option>
+                                </select>
                             </div>
                         </div>
 
-                        <div class="flex justify-end">
-                            <button type="submit" class="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-                                ➕ Ajouter
-                            </button>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                            <textarea id="descriptionInput" rows="3" placeholder="Description des tâches réalisées..." 
+                                   class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        </div>
+
+                        <div class="flex justify-between items-center">
+                            <div class="text-sm text-gray-600">
+                                Total journalier: <span class="font-semibold" id="dailyTotal">0h</span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button type="button" id="saveAsDraft" class="flex items-center space-x-2 bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors">
+                                    💾 Sauvegarder
+                                </button>
+                                <button type="submit" class="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                                    ➕ Ajouter
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -235,163 +237,1517 @@
                 <!-- Liste des temps saisis -->
                 <div class="bg-white p-6 rounded-lg shadow">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-medium text-gray-900">Temps saisi aujourd'hui</h2>
-                        <div class="text-sm text-gray-600">
-                            Total: <span class="font-semibold" id="dailyTotal">10h</span>
+                        <h2 class="text-lg font-medium text-gray-900">Temps saisis</h2>
+                        <div class="flex space-x-4 text-sm text-gray-600">
+                            <span>Total affiché: <span class="font-semibold" id="filteredTotal">0h</span></span>
                         </div>
                     </div>
                     
                     <div id="timeEntries" class="space-y-4">
-                        <!-- Entrée exemple -->
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <div class="flex justify-between items-start">
-                                <div class="flex-1">
-                                    <div class="flex items-center space-x-2 mb-2">
-                                        <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
-                                        <span class="font-semibold text-blue-600">DEV-001</span>
-                                        <span class="text-gray-600">-</span>
-                                        <span class="font-medium">Développement Site Web</span>
-                                        <span class="px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-800">Brouillon</span>
-                                    </div>
-                                    <div class="text-sm text-gray-500">Client: Client A</div>
-                                    <div class="text-sm text-gray-700 mt-2">Développement des fonctionnalités utilisateur</div>
-                                </div>
-                                <div class="flex items-center space-x-4">
-                                    <div class="text-lg font-semibold text-green-600">8h</div>
-                                    <button class="text-blue-500 hover:text-blue-700">✏️</button>
-                                    <button class="text-red-500 hover:text-red-700">❌</button>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <div class="flex justify-between items-start">
-                                <div class="flex-1">
-                                    <div class="flex items-center space-x-2 mb-2">
-                                        <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                                        <span class="font-semibold text-blue-600">MAINT-002</span>
-                                        <span class="text-gray-600">-</span>
-                                        <span class="font-medium">Maintenance Application</span>
-                                        <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">En attente</span>
-                                    </div>
-                                    <div class="text-sm text-gray-500">Client: Client B</div>
-                                    <div class="text-sm text-gray-700 mt-2">Correction de bugs critiques</div>
-                                </div>
-                                <div class="flex items-center space-x-4">
-                                    <div class="text-lg font-semibold text-green-600">2h</div>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- Les entrées seront générées dynamiquement -->
+                    </div>
+                    
+                    <div id="noEntries" class="text-center text-gray-500 py-8 hidden">
+                        Aucune saisie trouvée pour les critères sélectionnés
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Autres contenus d'onglets (simplifiés) -->
-        <div id="conges-content" class="tab-content hidden">
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h2 class="text-lg font-medium text-gray-900 mb-4">Gestion des congés</h2>
-                <p class="text-gray-600">Module de gestion des congés en développement...</p>
+        <!-- Gestion des Utilisateurs -->
+        <div id="utilisateurs-content" class="tab-content">
+            <div class="space-y-6">
+                <!-- Formulaire d'ajout d'utilisateur -->
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h2 class="text-lg font-medium text-gray-900 mb-4">Ajouter un utilisateur</h2>
+                    
+                    <form id="userForm" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Nom complet *</label>
+                                <input type="text" id="userNameInput" placeholder="Jean Dupont" 
+                                       class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                                <input type="email" id="userEmailInput" placeholder="jean.dupont@example.com" 
+                                       class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Rôle *</label>
+                                <select id="userRoleInput" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                    <option value="">Sélectionner un rôle</option>
+                                    <option value="employee">Employé</option>
+                                    <option value="manager">Manager</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Département</label>
+                                <select id="userDepartmentInput" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Sélectionner un département</option>
+                                    <option value="development">Développement</option>
+                                    <option value="design">Design</option>
+                                    <option value="marketing">Marketing</option>
+                                    <option value="hr">Ressources Humaines</option>
+                                    <option value="sales">Commercial</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Date d'embauche</label>
+                                <input type="date" id="userHireDateInput" 
+                                       class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <button type="submit" class="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                                ➕ Ajouter l'utilisateur
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Liste des utilisateurs -->
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-medium text-gray-900">Utilisateurs du système</h2>
+                        <div class="flex space-x-2">
+                            <select id="userStatusFilter" class="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500">
+                                <option value="">Tous les utilisateurs</option>
+                                <option value="active">Actifs</option>
+                                <option value="inactive">Inactifs</option>
+                            </select>
+                            <select id="userRoleFilter" class="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500">
+                                <option value="">Tous les rôles</option>
+                                <option value="employee">Employé</option>
+                                <option value="manager">Manager</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="usersList" class="space-y-4">
+                        <!-- Les utilisateurs seront générées dynamiquement -->
+                    </div>
+                    
+                    <div id="noUsers" class="text-center text-gray-500 py-8 hidden">
+                        Aucun utilisateur trouvé
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div id="projets-content" class="tab-content hidden">
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h2 class="text-lg font-medium text-gray-900 mb-4">Gestion des projets</h2>
-                <p class="text-gray-600">Module de gestion des projets en développement...</p>
+        <!-- Gestion des Projets -->
+        <div id="projets-content" class="tab-content">
+            <div class="space-y-6">
+                <!-- Formulaire d'ajout de projet -->
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h2 class="text-lg font-medium text-gray-900 mb-4">Ajouter un projet</h2>
+                    
+                    <form id="projectForm" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Nom du projet *</label>
+                                <input type="text" id="projectNameInput" placeholder="Site web e-commerce" 
+                                       class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Client *</label>
+                                <input type="text" id="projectClientInput" placeholder="ACME Corp" 
+                                       class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
+                                <select id="projectStatusInput" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="active">Actif</option>
+                                    <option value="inactive">Inactif</option>
+                                    <option value="completed">Terminé</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Budget (optionnel)</label>
+                                <input type="number" id="projectBudgetInput" placeholder="50000" 
+                                       class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                            <textarea id="projectDescriptionInput" rows="3" placeholder="Description du projet..." 
+                                   class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <button type="submit" class="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                                ➕ Ajouter le projet
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Liste des projets -->
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-medium text-gray-900">Projets</h2>
+                        <select id="projectStatusFilter" class="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500">
+                            <option value="">Tous les projets</option>
+                            <option value="active">Actifs</option>
+                            <option value="inactive">Inactifs</option>
+                            <option value="completed">Terminés</option>
+                        </select>
+                    </div>
+                    
+                    <div id="projectsList" class="space-y-4">
+                        <!-- Les projets seront générés dynamiquement -->
+                    </div>
+                    
+                    <div id="noProjects" class="text-center text-gray-500 py-8 hidden">
+                        Aucun projet trouvé
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div id="validation-content" class="tab-content hidden">
+        <!-- Validation -->
+        <div id="validation-content" class="tab-content">
             <div class="bg-white p-6 rounded-lg shadow">
-                <h2 class="text-lg font-medium text-gray-900 mb-4">Validation</h2>
-                <p class="text-gray-600">Module de validation en développement...</p>
+                <h2 class="text-lg font-medium text-gray-900 mb-4">Éléments en attente de validation</h2>
+                
+                <div id="validationItems" class="space-y-4">
+                    <!-- Les éléments de validation seront générés dynamiquement -->
+                </div>
+                
+                <div id="noValidations" class="text-center text-gray-500 py-8 hidden">
+                    Aucun élément en attente de validation
+                </div>
             </div>
         </div>
 
-        <div id="rapports-content" class="tab-content hidden">
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h2 class="text-lg font-medium text-gray-900 mb-4">Rapports</h2>
-                <p class="text-gray-600">Module de rapports en développement...</p>
+        <!-- Gestion des Congés -->
+        <div id="conges-content" class="tab-content">
+            <div class="space-y-6">
+                <!-- Calculatrice de congés -->
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h2 class="text-lg font-medium text-gray-900 mb-4">Calculatrice de congés</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Utilisateur</label>
+                            <select id="vacationUserSelect" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Mode de calcul</label>
+                            <select id="vacationMode" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                                <option value="ouvrables">Jours ouvrables (2,5j/mois)</option>
+                                <option value="ouvres">Jours ouvrés (2,08j/mois)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Résultats du calcul -->
+                    <div class="mt-6 bg-gray-50 p-4 rounded-lg">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                            <div>
+                                <div class="text-sm text-gray-600">Date d'embauche</div>
+                                <div class="text-lg font-semibold" id="hireDate">-</div>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-600">Mois travaillés</div>
+                                <div class="text-lg font-semibold" id="monthsWorked">-</div>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-600">Taux mensuel</div>
+                                <div class="text-lg font-semibold" id="monthlyRate">-</div>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-600">Congés acquis</div>
+                                <div class="text-lg font-semibold text-green-600" id="earnedVacation">-</div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-center">
+                            <div>
+                                <div class="text-sm text-gray-600">Congés pris</div>
+                                <div class="text-lg font-semibold text-red-600" id="takenVacation">-</div>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-600">Congés anticipés</div>
+                                <div class="text-lg font-semibold text-orange-600" id="anticipatedVacation">-</div>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-600">Solde restant</div>
+                                <div class="text-lg font-semibold text-blue-600" id="vacationBalance">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulaire de demande de congé -->
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h2 class="text-lg font-medium text-gray-900 mb-4">Nouvelle demande de congé</h2>
+                    
+                    <form id="vacationForm" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Type de congé *</label>
+                                <select id="vacationType" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" required>
+                                    <option value="cp">Congés payés</option>
+                                    <option value="rtt">RTT</option>
+                                    <option value="maladie">Maladie</option>
+                                    <option value="maternite">Maternité/Paternité</option>
+                                    <option value="sans_solde">Sans solde</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Date de début *</label>
+                                <input type="date" id="vacationStartDate" 
+                                       class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Date de fin *</label>
+                                <input type="date" id="vacationEndDate" 
+                                       class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                        </div>
+
+                        <div class="bg-blue-50 p-3 rounded-md">
+                            <div class="text-sm">
+                                Nombre de jours calculé: <span id="calculatedDays" class="font-semibold">0</span> jour(s)
+                            </div>
+                            <div id="anticipatedWarning" class="text-sm text-orange-600 mt-1 hidden">
+                                ⚠️ Cette demande dépasserait vos congés acquis (congés anticipés)
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Motif (optionnel)</label>
+                            <textarea id="vacationReason" rows="3" placeholder="Motif de la demande..." 
+                                   class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"></textarea>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <button type="submit" class="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                                📝 Soumettre la demande
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Liste des demandes -->
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-medium text-gray-900">Mes demandes de congés</h2>
+                        <select id="vacationStatusFilter" class="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500">
+                            <option value="">Toutes les demandes</option>
+                            <option value="pending">En attente</option>
+                            <option value="approved">Approuvées</option>
+                            <option value="rejected">Rejetées</option>
+                        </select>
+                    </div>
+                    
+                    <div id="vacationRequestsList" class="space-y-4">
+                        <!-- Les demandes seront générées dynamiquement -->
+                    </div>
+                    
+                    <div id="noVacationRequests" class="text-center text-gray-500 py-8 hidden">
+                        Aucune demande de congé trouvée
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Modales -->
+    <!-- Modal d'édition d'utilisateur -->
+    <div id="editUserModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 modal">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 class="text-lg font-medium mb-4">Modifier l'utilisateur</h3>
+            <form id="editUserForm">
+                <input type="hidden" id="editUserId">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nom complet *</label>
+                        <input type="text" id="editUserName" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                        <input type="email" id="editUserEmail" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Rôle *</label>
+                        <select id="editUserRole" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" required>
+                            <option value="employee">Employé</option>
+                            <option value="manager">Manager</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Département</label>
+                        <select id="editUserDepartment" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                            <option value="">Aucun</option>
+                            <option value="development">Développement</option>
+                            <option value="design">Design</option>
+                            <option value="marketing">Marketing</option>
+                            <option value="hr">Ressources Humaines</option>
+                            <option value="sales">Commercial</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-2 mt-6">
+                    <button type="button" onclick="document.getElementById('editUserModal').classList.add('hidden')" class="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors">
+                        Annuler
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+                        Sauvegarder
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de confirmation de suppression -->
+    <div id="deleteConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 modal">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 class="text-lg font-medium mb-4 text-red-600">Confirmer la suppression</h3>
+            <p id="deleteConfirmMessage" class="text-gray-600 mb-6">Êtes-vous sûr de vouloir supprimer cet élément ?</p>
+            <div class="flex justify-end space-x-2">
+                <button type="button" onclick="timesheetSystem.cancelDelete()" class="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors">
+                    Annuler
+                </button>
+                <button type="button" onclick="timesheetSystem.confirmDelete()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors">
+                    Supprimer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast de notification -->
+    <div id="toast" class="fixed top-4 right-4 z-50 hidden">
+        <div id="toastContent" class="text-white px-4 py-2 rounded-lg shadow-lg fade-in">
+        </div>
+    </div>
+
     <script>
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', function() {
-            // Afficher la date actuelle
-            const today = new Date();
-            document.getElementById('currentDate').textContent = today.toLocaleDateString('fr-FR');
+        class TimesheetSystem {
+            constructor() {
+                this.currentUser = 'Marie Dubois';
+                this.currentDate = new Date().toISOString().split('T')[0];
+                this.timeEntries = [];
+                this.users = [];
+                this.projects = [];
+                this.vacationRequests = [];
+                this.validationItems = [];
+                this.notifications = [];
+                this.deleteTargetId = null;
+                this.deleteTargetType = null;
 
-            // Gestion des onglets
-            const tabBtns = document.querySelectorAll('.tab-btn');
-            const tabContents = document.querySelectorAll('.tab-content');
+                this.initializeData();
+                this.setupEventListeners();
+                this.updateAllViews();
+            }
 
-            tabBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const targetTab = this.getAttribute('data-tab');
-                    
-                    // Réinitialiser tous les boutons
-                    tabBtns.forEach(b => {
-                        b.classList.remove('border-blue-500', 'text-blue-600');
-                        b.classList.add('border-transparent', 'text-gray-500');
+    login(email, password) {
+        const user = this.users.find(u => u.email === email && u.password === password);
+        if (!user) {
+            this.showToast("Email ou mot de passe incorrect", "error");
+            return false;
+        }
+        if (user.status !== "active") {
+            this.showToast("Utilisateur désactivé", "error");
+            return false;
+        }
+        this.currentUser = user;
+        this.showToast(`Bienvenue ${user.name}`, "success");
+
+        document.getElementById("loginScreen").classList.add("hidden");
+        document.getElementById("appContent").classList.remove("hidden");
+
+        if (user.role !== "admin") {
+            document.querySelector('[data-tab="utilisateurs"]').classList.add("hidden");
+            document.querySelector('[data-tab="projets"]').classList.add("hidden");
+            document.querySelector('[data-tab="validation"]').classList.add("hidden");
+        }
+
+        return true;
+    }
+
+
+            initializeData() {
+                // Utilisateurs par défaut
+                this.users = [
+                    { id: 'user1', name: 'Marie Dubois', email: 'marie.dubois@example.com', role: 'employee', department: 'development', status: 'active', hireDate: '2023-01-15' },
+                    { id: 'user2', name: 'Pierre Martin', email: 'pierre.martin@example.com', role: 'manager', department: 'marketing', status: 'active', hireDate: '2022-06-01' },
+                    { id: 'user3', name: 'Julie Leroy', email: 'julie.leroy@example.com', role: 'admin', department: 'hr', status: 'active', hireDate: '2021-03-10' }
+                ];
+
+                // Projets par défaut
+                this.projects = [
+                    { id: 'proj1', name: 'Site E-commerce', client: 'ACME Corp', status: 'active', description: 'Développement site e-commerce' },
+                    { id: 'proj2', name: 'Application Mobile', client: 'TechStart', status: 'active', description: 'App mobile iOS/Android' },
+                    { id: 'proj3', name: 'Refonte Intranet', client: 'BigCorp', status: 'completed', description: 'Modernisation intranet' }
+                ];
+
+                // Notifications par défaut
+                this.notifications = [
+                    { id: 'notif1', message: 'Votre feuille de temps de la semaine dernière est en attente de validation', type: 'warning', time: '2 heures', read: false },
+                    { id: 'notif2', message: 'Nouveau projet "Site E-commerce" assigné', type: 'info', time: '1 jour', read: false },
+                    { id: 'notif3', message: 'Demande de congé approuvée du 15 au 20 mars', type: 'success', time: '3 jours', read: true }
+                ];
+
+                // Éléments de validation par défaut
+                this.validationItems = [
+                    { id: 'val1', user: 'Marie Dubois', type: 'timesheet', description: 'Feuille de temps semaine 10', submittedAt: new Date('2024-03-08') },
+                    { id: 'val2', user: 'Pierre Martin', type: 'leave', description: 'Congé du 20 au 25 mars', submittedAt: new Date('2024-03-09') }
+                ];
+
+                // Initialiser la date courante
+                document.getElementById('currentDateInput').value = this.currentDate;
+                document.getElementById('entryDate').value = this.currentDate;
+            }
+
+            setupEventListeners() {
+                // Onglets
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.switchTab(e.target.dataset.tab);
                     });
-                    
-                    // Activer le bouton cliqué
-                    this.classList.remove('border-transparent', 'text-gray-500');
-                    this.classList.add('border-blue-500', 'text-blue-600');
-                    
-                    // Masquer tous les contenus
-                    tabContents.forEach(content => {
-                        content.classList.add('hidden');
-                    });
-                    
-                    // Afficher le contenu ciblé
-                    document.getElementById(targetTab + '-content').classList.remove('hidden');
                 });
-            });
 
-            // Gestion du formulaire de saisie
-            document.getElementById('timesheetForm').addEventListener('submit', function(e) {
-                e.preventDefault();
+                // Formulaires
+                document.getElementById('timesheetForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.addTimeEntry();
+                });
+
+                document.getElementById('userForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.addUser();
+                });
+
+                document.getElementById('projectForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.addProject();
+                });
+
+                document.getElementById('vacationForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.addVacationRequest();
+                });
+
+                document.getElementById('editUserForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.updateUser();
+                });
+
+                // Boutons spéciaux
+                document.getElementById('saveAsDraft').addEventListener('click', () => {
+                    document.getElementById('statusSelect').value = 'draft';
+                    this.addTimeEntry();
+                });
+
+                document.getElementById('exportBtn').addEventListener('click', () => {
+                    this.exportData();
+                });
+
+                // Changement d'utilisateur
+                document.getElementById('userSelect').addEventListener('change', (e) => {
+                    this.currentUser = e.target.value;
+                    this.updateAllViews();
+                });
+
+                // Filtres
+                document.getElementById('userStatusFilter')?.addEventListener('change', () => this.displayUsers());
+                document.getElementById('userRoleFilter')?.addEventListener('change', () => this.displayUsers());
+                document.getElementById('projectStatusFilter')?.addEventListener('change', () => this.displayProjects());
+                document.getElementById('vacationStatusFilter')?.addEventListener('change', () => this.displayVacationRequests());
+
+                // Calculatrice de congés
+                document.getElementById('vacationUserSelect')?.addEventListener('change', () => this.calculateVacation());
+                document.getElementById('vacationMode')?.addEventListener('change', () => this.calculateVacation());
+
+                // Calcul automatique des jours de congé
+                document.getElementById('vacationStartDate')?.addEventListener('change', () => this.updateVacationDays());
+                document.getElementById('vacationEndDate')?.addEventListener('change', () => this.updateVacationDays());
+            }
+
+            switchTab(tabName) {
+                // Masquer tous les contenus
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+
+                // Désactiver tous les boutons
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('border-blue-500', 'text-blue-600');
+                    btn.classList.add('border-transparent', 'text-gray-500');
+                });
+
+                // Activer l'onglet sélectionné
+                const activeContent = document.getElementById(`${tabName}-content`);
+                const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
                 
-                const project = document.getElementById('projectSelect').value;
-                const hours = document.getElementById('hoursInput').value;
-                const description = document.getElementById('descriptionInput').value;
-                
-                if (project && hours) {
-                    alert(`Temps ajouté: ${hours}h sur ${project}`);
-                    
-                    // Réinitialiser le formulaire
-                    this.reset();
-                    
-                    // Mettre à jour le total (simulation)
-                    const currentTotal = parseFloat(document.getElementById('dailyTotal').textContent);
-                    document.getElementById('dailyTotal').textContent = (currentTotal + parseFloat(hours)) + 'h';
-                } else {
-                    alert('Veuillez remplir tous les champs obligatoires');
+                if (activeContent) activeContent.classList.add('active');
+                if (activeBtn) {
+                    activeBtn.classList.remove('border-transparent', 'text-gray-500');
+                    activeBtn.classList.add('border-blue-500', 'text-blue-600');
                 }
-            });
+            }
 
-            // Export CSV
-            document.getElementById('exportBtn').addEventListener('click', function() {
-                const csvData = 'Date,Projet,Heures,Description\n01/09/2025,DEV-001,8,Développement\n01/09/2025,MAINT-002,2,Maintenance';
-                const blob = new Blob([csvData], { type: 'text/csv' });
-                const url = window.URL.createObjectURL(blob);
+            addTimeEntry() {
+                const project = document.getElementById('projectSelect').value;
+                const hours = parseFloat(document.getElementById('hoursInput').value);
+                const date = document.getElementById('entryDate').value;
+                const description = document.getElementById('descriptionInput').value;
+                const status = document.getElementById('statusSelect').value;
+
+                if (!project || !hours || !date) {
+                    this.showToast('Veuillez remplir tous les champs obligatoires', 'error');
+                    return;
+                }
+
+                const projectData = this.projects.find(p => p.id === project);
+                
+                const entry = {
+                    id: this.generateId(),
+                    user: this.currentUser,
+                    project: project,
+                    projectName: projectData ? projectData.name : project,
+                    client: projectData ? projectData.client : '',
+                    hours: hours,
+                    date: date,
+                    description: description,
+                    status: status,
+                    createdAt: new Date()
+                };
+
+                this.timeEntries.push(entry);
+                this.showToast('Temps saisi avec succès', 'success');
+                
+                // Reset du formulaire
+                document.getElementById('timesheetForm').reset();
+                document.getElementById('entryDate').value = this.currentDate;
+                document.getElementById('statusSelect').value = 'draft';
+                
+                this.updateAllViews();
+            }
+
+            addUser() {
+                const name = document.getElementById('userNameInput').value;
+                const email = document.getElementById('userEmailInput').value;
+                const role = document.getElementById('userRoleInput').value;
+                const department = document.getElementById('userDepartmentInput').value;
+                const hireDate = document.getElementById('userHireDateInput').value;
+
+                if (!name || !email || !role) {
+                    this.showToast('Veuillez remplir tous les champs obligatoires', 'error');
+                    return;
+                }
+
+                if (this.users.some(user => user.email === email)) {
+                    this.showToast('Cet email est déjà utilisé', 'error');
+                    return;
+                }
+
+                const user = {
+                    id: this.generateId(),
+                    name: name,
+                    email: email,
+                    role: role,
+                    department: department,
+                    status: 'active',
+                    hireDate: hireDate || this.currentDate,
+                    createdAt: new Date()
+                };
+
+                this.users.push(user);
+                this.showToast('Utilisateur ajouté avec succès', 'success');
+                
+                document.getElementById('userForm').reset();
+                this.updateAllViews();
+            }
+
+            addProject() {
+                const name = document.getElementById('projectNameInput').value;
+                const client = document.getElementById('projectClientInput').value;
+                const status = document.getElementById('projectStatusInput').value;
+                const budget = document.getElementById('projectBudgetInput').value;
+                const description = document.getElementById('projectDescriptionInput').value;
+
+                if (!name || !client) {
+                    this.showToast('Veuillez remplir tous les champs obligatoires', 'error');
+                    return;
+                }
+
+                const project = {
+                    id: this.generateId(),
+                    name: name,
+                    client: client,
+                    status: status,
+                    budget: budget ? parseFloat(budget) : null,
+                    description: description,
+                    createdAt: new Date()
+                };
+
+                this.projects.push(project);
+                this.showToast('Projet ajouté avec succès', 'success');
+                
+                document.getElementById('projectForm').reset();
+                this.updateAllViews();
+            }
+
+            addVacationRequest() {
+                const type = document.getElementById('vacationType').value;
+                const startDate = document.getElementById('vacationStartDate').value;
+                const endDate = document.getElementById('vacationEndDate').value;
+                const reason = document.getElementById('vacationReason').value;
+
+                if (!type || !startDate || !endDate) {
+                    this.showToast('Veuillez remplir tous les champs obligatoires', 'error');
+                    return;
+                }
+
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                
+                if (start >= end) {
+                    this.showToast('La date de fin doit être après la date de début', 'error');
+                    return;
+                }
+
+                const days = this.calculateWorkingDays(start, end);
+
+                const request = {
+                    id: this.generateId(),
+                    user: this.currentUser,
+                    type: type,
+                    startDate: startDate,
+                    endDate: endDate,
+                    days: days,
+                    reason: reason,
+                    status: 'pending',
+                    createdAt: new Date()
+                };
+
+                this.vacationRequests.push(request);
+                this.showToast('Demande de congé soumise', 'success');
+                
+                document.getElementById('vacationForm').reset();
+                this.updateAllViews();
+            }
+
+            displayTimeEntries() {
+                const container = document.getElementById('timeEntries');
+                const noEntriesDiv = document.getElementById('noEntries');
+                const filteredTotalEl = document.getElementById('filteredTotal');
+                
+                if (!container) return;
+
+                const userEntries = this.timeEntries.filter(entry => entry.user === this.currentUser);
+                const filteredTotal = userEntries.reduce((sum, entry) => sum + entry.hours, 0);
+                
+                if (filteredTotalEl) filteredTotalEl.textContent = filteredTotal + 'h';
+
+                if (userEntries.length === 0) {
+                    container.innerHTML = '';
+                    noEntriesDiv?.classList.remove('hidden');
+                    return;
+                }
+
+                noEntriesDiv?.classList.add('hidden');
+
+                const statusColors = {
+                    draft: 'bg-gray-100 text-gray-800',
+                    pending: 'bg-yellow-100 text-yellow-800',
+                    submitted: 'bg-blue-100 text-blue-800',
+                    validated: 'bg-green-100 text-green-800',
+                    rejected: 'bg-red-100 text-red-800'
+                };
+
+                const statusLabels = {
+                    draft: 'Brouillon',
+                    pending: 'En attente',
+                    submitted: 'Soumis',
+                    validated: 'Validé',
+                    rejected: 'Rejeté'
+                };
+
+                container.innerHTML = userEntries.map(entry => `
+                    <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <span class="font-medium">${entry.projectName}</span>
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full ${statusColors[entry.status]}">
+                                        ${statusLabels[entry.status]}
+                                    </span>
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    <div>📅 ${entry.date} • ⏰ ${entry.hours}h • 🏢 ${entry.client}</div>
+                                    ${entry.description ? `<div class="mt-1">💬 ${entry.description}</div>` : ''}
+                                </div>
+                            </div>
+                            <div class="flex space-x-2 ml-4">
+                                ${entry.status === 'draft' || entry.status === 'pending' ? `
+                                    <button onclick="timesheetSystem.editTimeEntry('${entry.id}')" 
+                                            class="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors">
+                                        ✏️ Éditer
+                                    </button>
+                                    <button onclick="timesheetSystem.deleteTimeEntry('${entry.id}')" 
+                                            class="px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors">
+                                        🗑️ Supprimer
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            displayUsers() {
+                const container = document.getElementById('usersList');
+                const noUsersDiv = document.getElementById('noUsers');
+                
+                if (!container) return;
+
+                const statusFilter = document.getElementById('userStatusFilter')?.value || '';
+                const roleFilter = document.getElementById('userRoleFilter')?.value || '';
+                
+                const filteredUsers = this.users.filter(user => {
+                    return (statusFilter === '' || user.status === statusFilter) &&
+                           (roleFilter === '' || user.role === roleFilter);
+                });
+
+                if (filteredUsers.length === 0) {
+                    container.innerHTML = '';
+                    noUsersDiv?.classList.remove('hidden');
+                    return;
+                }
+
+                noUsersDiv?.classList.add('hidden');
+
+                const roleColors = {
+                    admin: 'bg-red-100 text-red-800',
+                    manager: 'bg-blue-100 text-blue-800',
+                    employee: 'bg-green-100 text-green-800'
+                };
+
+                const statusColors = {
+                    active: 'bg-green-100 text-green-800',
+                    inactive: 'bg-gray-100 text-gray-800'
+                };
+
+                const departmentLabels = {
+                    development: 'Développement',
+                    design: 'Design',
+                    marketing: 'Marketing',
+                    hr: 'RH',
+                    sales: 'Commercial'
+                };
+
+                const roleLabels = {
+                    admin: 'Admin',
+                    manager: 'Manager', 
+                    employee: 'Employé'
+                };
+
+                container.innerHTML = filteredUsers.map(user => `
+                    <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <span class="font-medium text-lg">${user.name}</span>
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full ${roleColors[user.role]}">
+                                        ${roleLabels[user.role]}
+                                    </span>
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full ${statusColors[user.status]}">
+                                        ${user.status === 'active' ? 'Actif' : 'Inactif'}
+                                    </span>
+                                </div>
+                                <div class="text-sm text-gray-600 space-y-1">
+                                    <div>📧 ${user.email}</div>
+                                    ${user.department ? `<div>🏢 ${departmentLabels[user.department] || user.department}</div>` : ''}
+                                    <div>📅 Embauché le ${user.hireDate}</div>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2 ml-4">
+                                <button onclick="timesheetSystem.openEditUserModal('${user.id}')" 
+                                        class="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors">
+                                    ✏️ Éditer
+                                </button>
+                                <button onclick="timesheetSystem.toggleUserStatus('${user.id}')" 
+                                        class="px-3 py-1 text-xs ${user.status === 'active' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'} rounded hover:bg-opacity-80 transition-colors">
+                                    ${user.status === 'active' ? '⏸️ Désactiver' : '▶️ Activer'}
+                                </button>
+                                <button onclick="timesheetSystem.confirmDeleteUser('${user.id}')" 
+                                        class="px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors">
+                                    🗑️ Supprimer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            displayProjects() {
+                const container = document.getElementById('projectsList');
+                const noProjectsDiv = document.getElementById('noProjects');
+                
+                if (!container) return;
+
+                const statusFilter = document.getElementById('projectStatusFilter')?.value || '';
+                
+                const filteredProjects = this.projects.filter(project => {
+                    return statusFilter === '' || project.status === statusFilter;
+                });
+
+                if (filteredProjects.length === 0) {
+                    container.innerHTML = '';
+                    noProjectsDiv?.classList.remove('hidden');
+                    return;
+                }
+
+                noProjectsDiv?.classList.add('hidden');
+
+                const statusColors = {
+                    active: 'bg-green-100 text-green-800',
+                    inactive: 'bg-gray-100 text-gray-800',
+                    completed: 'bg-blue-100 text-blue-800'
+                };
+
+                const statusLabels = {
+                    active: 'Actif',
+                    inactive: 'Inactif',
+                    completed: 'Terminé'
+                };
+
+                container.innerHTML = filteredProjects.map(project => `
+                    <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <span class="font-medium">${project.name}</span>
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full ${statusColors[project.status]}">
+                                        ${statusLabels[project.status]}
+                                    </span>
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    <div>🏢 Client: ${project.client}</div>
+                                    <div>🆔 ID: ${project.id}</div>
+                                    ${project.budget ? `<div>💰 Budget: ${project.budget.toLocaleString()}€</div>` : ''}
+                                    ${project.description ? `<div class="mt-1">📝 ${project.description}</div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            displayValidationItems() {
+                const container = document.getElementById('validationItems');
+                const noValidationsDiv = document.getElementById('noValidations');
+                
+                if (!container) return;
+
+                if (this.validationItems.length === 0) {
+                    container.innerHTML = '';
+                    noValidationsDiv?.classList.remove('hidden');
+                    return;
+                }
+
+                noValidationsDiv?.classList.add('hidden');
+
+                const typeLabels = {
+                    timesheet: '⏰ Feuille de temps',
+                    leave: '🏖️ Congé'
+                };
+
+                container.innerHTML = this.validationItems.map(item => `
+                    <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="font-medium">${typeLabels[item.type]} - ${item.user}</div>
+                                <div class="text-sm text-gray-600">${item.description}</div>
+                                <div class="text-xs text-gray-500">Soumis le ${new Date(item.submittedAt).toLocaleDateString()}</div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="timesheetSystem.approveValidation('${item.id}')" 
+                                        class="px-3 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors">
+                                    ✅ Approuver
+                                </button>
+                                <button onclick="timesheetSystem.rejectValidation('${item.id}')" 
+                                        class="px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors">
+                                    ❌ Rejeter
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            displayVacationRequests() {
+                const container = document.getElementById('vacationRequestsList');
+                const noRequestsDiv = document.getElementById('noVacationRequests');
+                
+                if (!container) return;
+
+                const statusFilter = document.getElementById('vacationStatusFilter')?.value || '';
+                const userRequests = this.vacationRequests.filter(request => {
+                    return request.user === this.currentUser &&
+                           (statusFilter === '' || request.status === statusFilter);
+                });
+
+                if (userRequests.length === 0) {
+                    container.innerHTML = '';
+                    noRequestsDiv?.classList.remove('hidden');
+                    return;
+                }
+
+                noRequestsDiv?.classList.add('hidden');
+
+                const statusColors = {
+                    pending: 'bg-yellow-100 text-yellow-800',
+                    approved: 'bg-green-100 text-green-800',
+                    rejected: 'bg-red-100 text-red-800'
+                };
+
+                const statusLabels = {
+                    pending: 'En attente',
+                    approved: 'Approuvée',
+                    rejected: 'Rejetée'
+                };
+
+                const typeLabels = {
+                    cp: 'Congés payés',
+                    rtt: 'RTT',
+                    maladie: 'Maladie',
+                    maternite: 'Maternité/Paternité',
+                    sans_solde: 'Sans solde'
+                };
+
+                container.innerHTML = userRequests.map(request => `
+                    <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <span class="font-medium">${typeLabels[request.type]}</span>
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full ${statusColors[request.status]}">
+                                        ${statusLabels[request.status]}
+                                    </span>
+                                </div>
+                                <div class="text-sm text-gray-600 space-y-1">
+                                    <div>📅 Du ${request.startDate} au ${request.endDate}</div>
+                                    <div>📊 ${request.days} jour(s)</div>
+                                    ${request.reason ? `<div>💬 ${request.reason}</div>` : ''}
+                                    <div class="text-xs text-gray-500">Demandé le ${new Date(request.createdAt).toLocaleDateString()}</div>
+                                </div>
+                            </div>
+                            ${request.status === 'pending' ? `
+                                <div class="flex space-x-2 ml-4">
+                                    <button onclick="timesheetSystem.cancelVacationRequest('${request.id}')" 
+                                            class="px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors">
+                                        🗑️ Annuler
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            displayNotifications() {
+                const container = document.getElementById('notificationsList');
+                const badge = document.getElementById('notificationBadge');
+                const count = document.getElementById('notificationCount');
+                
+                if (!container) return;
+
+                const unreadCount = this.notifications.filter(n => !n.read).length;
+                
+                if (count) count.textContent = unreadCount;
+                if (badge) {
+                    badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+                }
+
+                const typeIcons = {
+                    warning: '⚠️',
+                    success: '✅',
+                    info: 'ℹ️',
+                    error: '❌'
+                };
+
+                const typeColors = {
+                    warning: 'bg-yellow-50 border-yellow-200',
+                    success: 'bg-green-50 border-green-200',
+                    info: 'bg-blue-50 border-blue-200',
+                    error: 'bg-red-50 border-red-200'
+                };
+
+                container.innerHTML = this.notifications.map(notification => `
+                    <div class="border rounded-lg p-3 ${typeColors[notification.type]} ${notification.read ? 'opacity-60' : ''}">
+                        <div class="flex items-start space-x-3">
+                            <span class="text-lg">${typeIcons[notification.type]}</span>
+                            <div class="flex-1">
+                                <div class="text-sm">${notification.message}</div>
+                                <div class="text-xs text-gray-500">Il y a ${notification.time}</div>
+                            </div>
+                            ${!notification.read ? `
+                                <button onclick="timesheetSystem.markNotificationRead('${notification.id}')" 
+                                        class="text-xs text-blue-600 hover:text-blue-800">
+                                    Marquer comme lu
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Méthodes d'action
+            editTimeEntry(entryId) {
+                const entry = this.timeEntries.find(e => e.id === entryId);
+                if (!entry) return;
+
+                document.getElementById('projectSelect').value = entry.project;
+                document.getElementById('hoursInput').value = entry.hours;
+                document.getElementById('entryDate').value = entry.date;
+                document.getElementById('descriptionInput').value = entry.description;
+                document.getElementById('statusSelect').value = entry.status;
+
+                this.deleteTimeEntry(entryId, false);
+                this.showToast('Entrée chargée pour modification', 'info');
+            }
+
+            deleteTimeEntry(entryId, showToast = true) {
+                const entryIndex = this.timeEntries.findIndex(e => e.id === entryId);
+                if (entryIndex !== -1) {
+                    this.timeEntries.splice(entryIndex, 1);
+                    if (showToast) {
+                        this.showToast('Entrée supprimée', 'success');
+                    }
+                    this.updateAllViews();
+                }
+            }
+
+            openEditUserModal(userId) {
+                const user = this.users.find(u => u.id === userId);
+                if (!user) return;
+
+                document.getElementById('editUserId').value = user.id;
+                document.getElementById('editUserName').value = user.name;
+                document.getElementById('editUserEmail').value = user.email;
+                document.getElementById('editUserRole').value = user.role || 'employee';
+                document.getElementById('editUserDepartment').value = user.department || '';
+
+                document.getElementById('editUserModal').classList.remove('hidden');
+            }
+
+            updateUser() {
+                const userId = document.getElementById('editUserId').value;
+                const user = this.users.find(u => u.id === userId);
+                
+                if (!user) return;
+
+                const newEmail = document.getElementById('editUserEmail').value;
+                
+                // Vérifier si l'email est déjà utilisé par un autre utilisateur
+                if (this.users.some(u => u.id !== userId && u.email === newEmail)) {
+                    this.showToast('Cet email est déjà utilisé par un autre utilisateur', 'error');
+                    return;
+                }
+
+                user.name = document.getElementById('editUserName').value;
+                user.email = newEmail;
+                user.role = document.getElementById('editUserRole').value;
+                user.department = document.getElementById('editUserDepartment').value;
+
+                this.showToast('Utilisateur modifié avec succès', 'success');
+                document.getElementById('editUserModal').classList.add('hidden');
+                
+                this.updateAllViews();
+            }
+
+            toggleUserStatus(userId) {
+                const user = this.users.find(u => u.id === userId);
+                if (!user) return;
+
+                user.status = user.status === 'active' ? 'inactive' : 'active';
+                
+                this.showToast(`Utilisateur ${user.status === 'active' ? 'activé' : 'désactivé'}`, 'success');
+                this.updateAllViews();
+            }
+
+            confirmDeleteUser(userId) {
+                const user = this.users.find(u => u.id === userId);
+                if (!user) return;
+
+                this.deleteTargetId = userId;
+                this.deleteTargetType = 'user';
+                document.getElementById('deleteConfirmMessage').textContent = 
+                    `Êtes-vous sûr de vouloir supprimer l'utilisateur "${user.name}" ? Cette action est irréversible.`;
+                document.getElementById('deleteConfirmModal').classList.remove('hidden');
+            }
+
+            confirmDelete() {
+                if (this.deleteTargetType === 'user') {
+                    const userIndex = this.users.findIndex(u => u.id === this.deleteTargetId);
+                    if (userIndex !== -1) {
+                        const user = this.users[userIndex];
+                        this.users.splice(userIndex, 1);
+                        this.showToast(`Utilisateur "${user.name}" supprimé`, 'success');
+                        this.updateAllViews();
+                    }
+                } else if (this.deleteTargetType === 'vacation') {
+                    const requestIndex = this.vacationRequests.findIndex(r => r.id === this.deleteTargetId);
+                    if (requestIndex !== -1) {
+                        this.vacationRequests.splice(requestIndex, 1);
+                        this.showToast('Demande de congé annulée', 'success');
+                        this.updateAllViews();
+                    }
+                }
+
+                this.cancelDelete();
+            }
+
+            cancelDelete() {
+                this.deleteTargetId = null;
+                this.deleteTargetType = null;
+                document.getElementById('deleteConfirmModal').classList.add('hidden');
+            }
+
+            cancelVacationRequest(requestId) {
+                this.deleteTargetId = requestId;
+                this.deleteTargetType = 'vacation';
+                document.getElementById('deleteConfirmMessage').textContent = 
+                    'Êtes-vous sûr de vouloir annuler cette demande de congé ?';
+                document.getElementById('deleteConfirmModal').classList.remove('hidden');
+            }
+
+            approveValidation(itemId) {
+                const itemIndex = this.validationItems.findIndex(item => item.id === itemId);
+                if (itemIndex !== -1) {
+                    this.validationItems.splice(itemIndex, 1);
+                    this.showToast('Élément approuvé', 'success');
+                    this.updateAllViews();
+                }
+            }
+
+            rejectValidation(itemId) {
+                const itemIndex = this.validationItems.findIndex(item => item.id === itemId);
+                if (itemIndex !== -1) {
+                    this.validationItems.splice(itemIndex, 1);
+                    this.showToast('Élément rejeté', 'success');
+                    this.updateAllViews();
+                }
+            }
+
+            markNotificationRead(notificationId) {
+                const notification = this.notifications.find(n => n.id === notificationId);
+                if (notification) {
+                    notification.read = true;
+                    this.displayNotifications();
+                }
+            }
+
+            // Calculs et utilitaires
+            calculateVacation() {
+                const userSelect = document.getElementById('vacationUserSelect');
+                const modeSelect = document.getElementById('vacationMode');
+                
+                if (!userSelect || !modeSelect) return;
+
+                const selectedUserName = userSelect.value;
+                const mode = modeSelect.value;
+                
+                const user = this.users.find(u => u.name === selectedUserName);
+                if (!user) return;
+
+                const hireDate = new Date(user.hireDate);
+                const today = new Date();
+                
+                // Calculer les mois travaillés
+                const monthsWorked = Math.floor((today - hireDate) / (1000 * 60 * 60 * 24 * 30.44));
+                
+                // Taux selon le mode
+                const monthlyRate = mode === 'ouvrables' ? 2.5 : 2.08;
+                const earnedVacation = Math.floor(monthsWorked * monthlyRate * 100) / 100;
+                
+                // Congés pris (simulé)
+                const takenVacation = 7;
+                const anticipatedVacation = 0;
+                const balance = earnedVacation - takenVacation - anticipatedVacation;
+
+                // Mise à jour de l'affichage
+                document.getElementById('hireDate').textContent = user.hireDate;
+                document.getElementById('monthsWorked').textContent = monthsWorked;
+                document.getElementById('monthlyRate').textContent = monthlyRate + 'j/mois';
+                document.getElementById('earnedVacation').textContent = earnedVacation + 'j';
+                document.getElementById('takenVacation').textContent = takenVacation + 'j';
+                document.getElementById('anticipatedVacation').textContent = anticipatedVacation + 'j';
+                document.getElementById('vacationBalance').textContent = balance + 'j';
+            }
+
+            calculateWorkingDays(startDate, endDate) {
+                let count = 0;
+                const current = new Date(startDate);
+                
+                while (current <= endDate) {
+                    const dayOfWeek = current.getDay();
+                    // Exclure weekends (0 = dimanche, 6 = samedi)
+                    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                        count++;
+                    }
+                    current.setDate(current.getDate() + 1);
+                }
+                
+                return count;
+            }
+
+            updateVacationDays() {
+                const startDate = document.getElementById('vacationStartDate')?.value;
+                const endDate = document.getElementById('vacationEndDate')?.value;
+                
+                if (startDate && endDate) {
+                    const start = new Date(startDate);
+                    const end = new Date(endDate);
+                    
+                    if (start < end) {
+                        const days = this.calculateWorkingDays(start, end);
+                        document.getElementById('calculatedDays').textContent = days;
+                    } else {
+                        document.getElementById('calculatedDays').textContent = '0';
+                    }
+                }
+            }
+
+            loadUsers() {
+                const userSelect = document.getElementById('userSelect');
+                const vacationUserSelect = document.getElementById('vacationUserSelect');
+                
+                if (userSelect) {
+                    const currentValue = userSelect.value;
+                    userSelect.innerHTML = '';
+                    
+                    this.users.forEach(user => {
+                        if (user.status === 'active') {
+                            const option = document.createElement('option');
+                            option.value = user.name;
+                            option.textContent = `${user.name} (${user.role})`;
+                            userSelect.appendChild(option);
+                        }
+                    });
+                    
+                    if (currentValue && this.users.some(u => u.name === currentValue)) {
+                        userSelect.value = currentValue;
+                    } else if (userSelect.options.length > 0) {
+                        userSelect.value = userSelect.options[0].value;
+                        this.currentUser = userSelect.options[0].value;
+                    }
+                }
+
+                if (vacationUserSelect) {
+                    const currentValue = vacationUserSelect.value;
+                    vacationUserSelect.innerHTML = '';
+                    
+                    this.users.forEach(user => {
+                        if (user.status === 'active') {
+                            const option = document.createElement('option');
+                            option.value = user.name;
+                            option.textContent = user.name;
+                            vacationUserSelect.appendChild(option);
+                        }
+                    });
+                    
+                    if (currentValue) {
+                        vacationUserSelect.value = currentValue;
+                    }
+                }
+            }
+
+            loadProjects() {
+                const projectSelect = document.getElementById('projectSelect');
+                if (projectSelect) {
+                    const currentValue = projectSelect.value;
+                    projectSelect.innerHTML = '<option value="">Sélectionner un projet</option>';
+                    
+                    this.projects.forEach(project => {
+                        if (project.status === 'active') {
+                            const option = document.createElement('option');
+                            option.value = project.id;
+                            option.textContent = project.name;
+                            projectSelect.appendChild(option);
+                        }
+                    });
+                    
+                    if (currentValue) {
+                        projectSelect.value = currentValue;
+                    }
+                }
+            }
+
+            updateDashboardStats() {
+                // Calculer les jours de la semaine
+                const today = new Date();
+                const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1));
+                const endOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 7));
+                
+                const weeklyEntries = this.timeEntries.filter(entry => {
+                    const entryDate = new Date(entry.date);
+                    return entry.user === this.currentUser && 
+                           entryDate >= startOfWeek && 
+                           entryDate <= endOfWeek;
+                });
+                
+                const weeklyDays = weeklyEntries.reduce((sum, entry) => sum + (entry.days || entry.hours || 0), 0);
+                const weeklyTarget = 5; // 5 jours par semaine
+                const occupationRate = Math.min(Math.round((weeklyDays / weeklyTarget) * 100), 100);
+                
+                document.getElementById('weeklyHours').textContent = weeklyDays + 'j';
+                document.getElementById('occupationRate').textContent = occupationRate + '%';
+                document.getElementById('occupationBar').style.width = occupationRate + '%';
+                
+                const weeklyWarning = document.getElementById('weeklyWarning');
+                if (weeklyDays < weeklyTarget * 0.8) {
+                    weeklyWarning.textContent = 'Attention: sous la cible';
+                    weeklyWarning.className = 'text-xs mt-1 text-yellow-200';
+                } else if (weeklyDays >= weeklyTarget) {
+                    weeklyWarning.textContent = 'Objectif atteint !';
+                    weeklyWarning.className = 'text-xs mt-1 text-green-200';
+                } else {
+                    weeklyWarning.textContent = '';
+                }
+            }
+
+            updateValidationCounts() {
+                const count = this.validationItems.length;
+                document.getElementById('validationCount').textContent = count;
+                document.getElementById('validationDashboardCount').textContent = count;
+                
+                // Mise à jour de la liste dashboard
+                const validationList = document.getElementById('validationList');
+                if (validationList) {
+                    if (count === 0) {
+                        validationList.innerHTML = '<div class="text-gray-500 text-sm">Aucune action en attente</div>';
+                    } else {
+                        validationList.innerHTML = this.validationItems.slice(0, 3).map(item => `
+                            <div class="flex items-center justify-between p-2 bg-orange-50 rounded border-l-4 border-orange-400">
+                                <div class="text-sm">
+                                    <span class="font-medium">${item.user}</span> - ${item.description}
+                                </div>
+                                <div class="flex space-x-1">
+                                    <button onclick="timesheetSystem.approveValidation('${item.id}')" 
+                                            class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded">
+                                        Approuver
+                                    </button>
+                                    <button onclick="timesheetSystem.rejectValidation('${item.id}')" 
+                                            class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded">
+                                        Rejeter
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                }
+            }
+
+            updateAllViews() {
+                this.displayTimeEntries();
+                this.displayUsers();
+                this.displayProjects();
+                this.displayValidationItems();
+                this.displayVacationRequests();
+                this.displayNotifications();
+                this.loadUsers();
+                this.loadProjects();
+                this.updateDashboardStats();
+                this.updateValidationCounts();
+                this.calculateVacation();
+            }
+
+            exportData() {
+                const data = {
+                    timeEntries: this.timeEntries,
+                    users: this.users,
+                    projects: this.projects,
+                    vacationRequests: this.vacationRequests,
+                    notifications: this.notifications,
+                    exportDate: new Date().toISOString(),
+                    currentUser: this.currentUser
+                };
+
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'timesheet.csv';
+                a.download = `timesheet_export_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
                 a.click();
-                window.URL.revokeObjectURL(url);
-            });
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                this.showToast('Données exportées avec succès', 'success');
+            }
 
-            // Notifications
-            document.getElementById('notificationBtn').addEventListener('click', function() {
-                alert('3 nouvelles notifications:\n- Alerte heures supplémentaires\n- Feuille de temps soumise\n- Demande de congé en attente');
-                document.getElementById('notificationBadge').style.display = 'none';
-            });
+            showToast(message, type = 'success') {
+                const toast = document.getElementById('toast');
+                const toastContent = document.getElementById('toastContent');
+                
+                if (!toast || !toastContent) return;
+
+                const colors = {
+                    success: 'bg-green-500',
+                    error: 'bg-red-500',
+                    info: 'bg-blue-500',
+                    warning: 'bg-yellow-500'
+                };
+
+                toastContent.className = `${colors[type]} text-white px-4 py-2 rounded-lg shadow-lg fade-in`;
+                toastContent.textContent = message;
+                
+                toast.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 3000);
+            }
+
+            generateId() {
+                return 'id_' + Math.random().toString(36).substr(2, 9);
+            }
+        }
+
+        // Initialisation du système
+        const timesheetSystem = new TimesheetSystem();
+
+        // Event listeners globaux pour les modales
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.add('hidden');
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.classList.add('hidden');
+                });
+            }
         });
     </script>
+</div>
 </body>
 </html>
